@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Vente</title>
+</head>
+<body>
+    <h1>Formulaire de Vente</h1>
+    <form id="salesForm">
+        <label for="itemName">Nom de l'article:</label>
+        <input type="text" id="itemName" name="itemName" required><br><br>
+
+        <label for="price">Prix sans réduction:</label>
+        <input type="number" id="price" name="price" required><br><br>
+
+        <label for="discount">Réduction (%):</label>
+        <input type="number" id="discount" name="discount" required><br><br>
+
+        <label for="totalPrice">Prix avec réduction:</label>
+        <input type="text" id="totalPrice" name="totalPrice" readonly><br><br>
+
+        <button type="submit">Soumettre</button>
+    </form>
+
+    <script>
+        document.getElementById('salesForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const price = parseFloat(document.getElementById('price').value);
+            const discount = parseFloat(document.getElementById('discount').value);
+            const totalPrice = price - (price * (discount / 100));
+
+            document.getElementById('totalPrice').value = totalPrice.toFixed(2);
+
+            // Une fois les calculs faits, envoyer les données à Google Sheets
+            sendToGoogleSheets(document.getElementById('itemName').value, price, discount, totalPrice);
+        });
+
+        function sendToGoogleSheets(itemName, price, discount, totalPrice) {
+            const data = {
+                itemName: itemName,
+                price: price,
+                discount: discount,
+                totalPrice: totalPrice
+            };
+
+            fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => console.log('Succès:', data))
+              .catch(error => console.error('Erreur:', error));
+        }
+    </script>
+</body>
+</html>
